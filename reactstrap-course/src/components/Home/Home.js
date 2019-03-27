@@ -11,7 +11,7 @@ class Home extends React.Component {
     render() {
         return (
             <div>
-                <SiteCarousel />
+                <SiteCarousel >Test</SiteCarousel>
                 <VehicleBrowser />
             </div>
         );
