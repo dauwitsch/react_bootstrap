@@ -9,12 +9,16 @@ class Home extends React.Component {
     }
 
     render() {
-        return (
-            <div>
-                <SiteCarousel >Test</SiteCarousel>
-                <VehicleBrowser />
-            </div>
-        );
+        if (this.props.vehicleData) {
+            return (
+                <div>
+                    <SiteCarousel vehicleData={this.props.vehicleData}></SiteCarousel>
+                    <VehicleBrowser vehicleData={this.props.vehicleData} />
+                </div>
+            );
+        } else {
+            return null;
+        }
     }
 }
 
