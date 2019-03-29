@@ -19,10 +19,8 @@ import {
     ModalHeader,
     ModalBody,
     ModalFooter,
-    Button,
-    Progress
+    Button
 } from 'reactstrap';
-
 
 class BuildAndPrice extends React.Component {
     constructor(props) {
@@ -32,7 +30,7 @@ class BuildAndPrice extends React.Component {
         this.selectColor = this.selectColor.bind(this);
         this.selectEngine = this.selectEngine.bind(this);
         this.toggleModal = this.toggleModal.bind(this);
-        this.determineProgress = this.determineProgress.bind(this);
+        //this.determineProgress = this.determineProgress.bind(this);
         this.computePrice = this.computePrice.bind(this);
         this.state = {
             activeTab: '1',  //currently displayed tab (note it starts at 1 not 0)
@@ -51,47 +49,142 @@ class BuildAndPrice extends React.Component {
         };
     }
 
-    selectVehicle(eventData){
-        //TODO:  this method will handle the user selecting a vechicle
+    selectVehicle(eventData) {
+        const selected = eventData.target.dataset.model;
+        const msrp = eventData.target.dataset.msrp;
+        this.setState({
+            activeTab: '2',
+            msrp: msrp,
+            selectedVehicle: selected
+        });
     }
 
-    selectColor(eventData){
-        //TODO:  this method will store the user's color choice
+    selectColor(eventData) {
+        const selected = eventData.target.dataset.color;
+        const selectedColorName = eventData.target.dataset.colorName;
+        this.setState({
+            activeTab: '3',
+            selectedColor: Number(selected),
+            selectedColorName: selectedColorName
+        });
     }
 
-    selectEngine(eventData){
-        //TODO:  this method will store the user's engine selection
+    selectEngine(eventData) {
+        const selected = eventData.target.dataset.engine;
+        const engineCost = eventData.target.dataset.engineCost;
+        console.log("engineCost:", engineCost);
+        const engineName = eventData.target.dataset.engineName;
+        this.setState({
+            selectedEngine: Number(selected),
+            selectedEngineName: engineName,
+            engineCost: engineCost,
+            modal: true
+        })
     }
 
-    toggleModal(){
-        //TODO:  this method controls showing and hiding the modal form displayed at the end
+    toggleModal() {
+        this.setState({ modal: !this.state.modal });
     }
 
-    computePrice(){
+    computePrice() {
         return Number(this.state.msrp) + Number(this.state.engineCost);
     }
 
     toggle(tab) {
-        //TODO:  this will control the tab component
+        if (this.state.activeTab !== tab) {
+            this.setState({
+                activeTab: tab
+            });
+        }
     }
+
     render() {
         return (
             <div>
                 <h3>Build and Price</h3>
-                //We've already built one image rotator, so we won't do this one
-                <BuildAndPriceImageRotator 
-                //Pass all the defaults for each selection
-                  vehicleData = {this.props.vehicleData}
-                  selectedVehicle={this.state.selectedVehicle} 
-                  colorIndex={this.state.selectedColor}
-                  colorName = {this.state.selectedColorName}
-               //Pass in all the functions.  The state for everything is held here.
-               //All the components within build & price are "dumb" components.
-                  cost={this.computePrice()}
-                  engineIndex={this.state.selectedEngine} />
-                  <h4>Color: {this.state.selectedColorName}</h4>
-                  <h5>Engine: {this.state.selectedEngineName}</h5>
-                  <h5>Price as configured: {Numeral(this.computePrice()).format('$0,0.00')}</h5>                
+                <BuildAndPriceImageRotator
+                    //Pass all the defaults for each selection
+                    vehicleData={this.props.vehicleData}
+                    selectedVehicle={this.state.selectedVehicle}
+                    colorIndex={this.state.selectedColor}
+                    colorName={this.state.selectedColorName}
+                    //Pass in all the functions.  The state for everything is held here.
+                    //All the components within build & price are "dumb" components.
+                    cost={this.computePrice()}
+                    engineIndex={this.state.selectedEngine} />
+                <h4>Color: {this.state.selectedColorName}</h4>
+                <h5>Engine: {this.state.selectedEngineName}</h5>
+                <h5>Price as configured: {Numeral(this.computePrice()).format('$0,0.00')}</h5>
+
+                <Nav tabs>
+                    <NavItem>
+                        <NavLink
+                            className={classnames({ active: this.state.activeTab === '1' })}
+                            onClick={() => { this.toggle('1'); }}
+                        >
+                            Model
+            </NavLink>
+                    </NavItem>
+                    <NavItem>
+                        <NavLink
+                            className={classnames({ active: this.state.activeTab === '2' })}
+                            onClick={() => { this.toggle('2'); }}
+                        >
+                            Color
+            </NavLink>
+                    </NavItem>
+                    <NavItem>
+                        <NavLink
+                            className={classnames({ active: this.state.activeTab === '3' })}
+                            onClick={() => { this.toggle('3'); }}
+                        >
+                            Powerplant
+            </NavLink>
+                    </NavItem>
+                </Nav>
+                <TabContent activeTab={this.state.activeTab}>
+                    <TabPane tabId="1">
+                        <Row>
+                            <Col sm="12">
+                                <ModelPicker
+                                    vehicleData={this.props.vehicleData}
+                                    selectedVehicle={this.props.selectedVehicle}
+                                    selectVehicle={this.selectVehicle} />
+                            </Col>
+                        </Row>
+                    </TabPane>
+                    <TabPane tabId="2">
+                        <Row>
+                            <Col sm="12">
+                                <ColorPicker
+                                    selectColor={this.selectColor}
+                                    vehicleData={this.props.vehicleData}
+                                    selectedVehicle={this.state.selectedVehicle}
+                                    selectedColor={this.state.selectedColor} />
+                            </Col>
+                        </Row>
+                    </TabPane>
+                    <TabPane tabId="3">
+                        <Row>
+                            <Col sm="12">
+                                <EnginePicker
+                                    vehicleData={this.props.vehicleData}
+                                    onEngineSelect={this.selectEngine}
+                                    selectedVehicle={this.state.selectedVehicle}
+                                    selectedEngine={this.state.selectedEngine} />
+                            </Col>
+                        </Row>
+                    </TabPane>
+                </TabContent>
+                <Modal isOpen={this.state.modal} toggle={this.toggleModal}>
+                    <ModalHeader toggle={this.toggle}>Schedule a Test Flight</ModalHeader>
+                    <ModalBody>
+                        <TestFlightForm />
+                    </ModalBody>
+                    <ModalFooter>
+                        <Button color="primary" onClick={this.toggleModal}>Done</Button>
+                    </ModalFooter>
+                </Modal>
             </div>);
     }
 }

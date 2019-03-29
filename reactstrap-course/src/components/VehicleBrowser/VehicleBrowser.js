@@ -4,9 +4,6 @@ import { Container, Row, Col, Card, CardImg, CardText, CardBody, CardTitle, Card
 import Numeral from 'numeral';
 
 class VehicleBrowser extends React.Component {
-    constructor(props) {
-        super(props);
-    }
 
     render() {
         const VehicleSelections = this.props.vehicleData.map((item) => {
